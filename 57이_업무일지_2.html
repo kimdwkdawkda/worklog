@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>57이 업무일지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6fb;--surface:#fff;--surface2:#f0f2f7;--surface3:#e8eaf2;
+  --border:rgba(0,0,0,0.08);--border-hov:rgba(0,0,0,0.16);
+  --text:#1a1d2e;--muted:#8a90a8;
+  --accent:#3b7ef8;--accent-dim:rgba(59,126,248,0.10);
+  --green:#16a34a;--green-dim:rgba(22,163,74,0.10);
+  --red:#dc2626;--red-dim:rgba(220,38,38,0.10);
+  --orange:#ea580c;--orange-dim:rgba(234,88,12,0.09);
+  --purple:#7c3aed;--purple-dim:rgba(124,58,237,0.09);
+  --teal:#0d9488;--teal-dim:rgba(13,148,136,0.09);
+  --mono:'JetBrains Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,126,248,0.03)1px,transparent 1px),linear-gradient(90deg,rgba(59,126,248,0.03)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.main{position:relative;z-index:1;max-width:760px;margin:0 auto;width:100%;padding:2.5rem 1.5rem 5rem;flex:1}
+
+/* Header */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2.5rem}
+.logo{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.page-title{font-size:28px;font-weight:600;color:var(--text);letter-spacing:-.02em}
+.header-right{text-align:right}
+.clock{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text);letter-spacing:.04em}
+.clock-date{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+.status-pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;padding:5px 12px;border-radius:100px;margin-top:8px;transition:all .3s}
+.status-pill.open{background:var(--green-dim);color:var(--green);border:1px solid rgba(22,163,74,.25)}
+.status-pill.locked{background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.status-pill.open .status-dot{background:var(--green);box-shadow:0 0 6px rgba(22,163,74,.5);animation:pulse 2s infinite}
+.status-pill.locked .status-dot{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Section label */
+.sec-label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:border-color .3s}
+.card.locked-card{border-color:rgba(220,38,38,.25)}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+
+.today-date{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--accent);margin-bottom:1.25rem;letter-spacing:.02em}
+
+/* Sub-label inside card */
+.sub-label{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;margin:10px 0 7px}
+.sub-label:first-child{margin-top:0}
+
+/* Task rows */
+.task-list{display:flex;flex-direction:column;gap:0;margin-bottom:10px}
+.task-block{margin-bottom:12px}
+.task-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.task-bullet{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;opacity:.5}
+.task-bullet.def{background:var(--muted);opacity:.4}
+
+.task-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-family:var(--sans);font-size:14px;color:var(--text);outline:none;transition:border-color .15s,background .15s,box-shadow .15s}
+.task-input::placeholder{color:var(--muted)}
+.task-input:focus{border-color:rgba(59,126,248,.4);background:#fff;box-shadow:0 0 0 3px rgba(59,126,248,.08)}
+.task-input:disabled{opacity:.5;cursor:not-allowed}
+
+.task-count{width:52px;height:34px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:0 8px;font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500;text-align:center;outline:none;flex-shrink:0;transition:border-color .15s,box-shadow .15s}
+.task-count:focus{border-color:rgba(59,126,248,.4);box-shadow:0 0 0 3px rgba(59,126,248,.08)}
+.task-count:disabled{opacity:.4;cursor:not-allowed}
+.count-unit{font-family:var(--mono);font-size:11px;color:var(--muted);flex-shrink:0}
+
+/* Review textarea per task */
+.task-review{width:100%;min-height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-family:var(--sans);font-size:13px;color:var(--text);resize:vertical;outline:none;line-height:1.55;transition:border-color .15s,box-shadow .15s;margin-left:14px}
+.task-review::placeholder{color:var(--muted)}
+.task-review:focus{border-color:rgba(124,58,237,.35);box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+.task-review:disabled{opacity:.45;cursor:not-allowed}
+
+.task-del{width:30px;height:30px;border:1px solid var(--border);background:transparent;border-radius:7px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;flex-shrink:0}
+.task-del:hover:not(:disabled){border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.task-del:disabled{opacity:.15;cursor:not-allowed}
+
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+.add-btn{width:100%;padding:9px;background:transparent;border:1.5px dashed rgba(59,126,248,.2);border-radius:8px;color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin-top:4px}
+.add-btn:hover:not(:disabled){border-color:rgba(59,126,248,.5);color:var(--accent);background:var(--accent-dim)}
+.add-btn:disabled{opacity:.2;cursor:not-allowed}
+
+.locked-notice{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:var(--red);margin-top:12px;font-family:var(--mono);opacity:0;transition:opacity .4s}
+.locked-notice.visible{opacity:.75}
+
+/* 총합 후기 */
+.total-review-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--teal);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.total-review-label::before{content:'◈';font-size:10px}
+.total-review-ta{width:100%;min-height:80px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-family:var(--sans);font-size:14px;color:var(--text);resize:vertical;outline:none;line-height:1.6;transition:border-color .15s,box-shadow .15s}
+.total-review-ta::placeholder{color:var(--muted)}
+.total-review-ta:focus{border-color:rgba(13,148,136,.4);box-shadow:0 0 0 3px rgba(13,148,136,.08)}
+.total-review-ta:disabled{opacity:.45;cursor:not-allowed}
+
+/* 오늘의 다짐 */
+.resolve-today-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--orange);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.resolve-today-label::before{content:'✦';font-size:10px}
+.resolve-ta{width:100%;min-height:68px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-family:var(--sans);font-size:14px;color:var(--text);resize:vertical;outline:none;line-height:1.6;transition:border-color .15s,box-shadow .15s}
+.resolve-ta::placeholder{color:var(--muted)}
+.resolve-ta:focus{border-color:rgba(234,88,12,.35);box-shadow:0 0 0 3px rgba(234,88,12,.07)}
+.resolve-ta:disabled{opacity:.45;cursor:not-allowed}
+
+/* 고정 다짐 */
+.fixed-resolve-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.fixed-resolve-label::before{content:'★';font-size:10px}
+.fixed-resolve-ta{width:100%;min-height:68px;background:var(--purple-dim);border:1px solid rgba(124,58,237,.18);border-radius:9px;padding:10px 13px;font-family:var(--sans);font-size:14px;color:var(--text);resize:vertical;outline:none;line-height:1.6;transition:border-color .15s,box-shadow .15s}
+.fixed-resolve-ta::placeholder{color:var(--muted)}
+.fixed-resolve-ta:focus{border-color:rgba(124,58,237,.45);box-shadow:0 0 0 3px rgba(124,58,237,.09)}
+.fixed-hint{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono)}
+
+/* History */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.hist-card:hover{border-color:var(--border-hov);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.hist-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;cursor:pointer;user-select:none}
+.hist-date-lbl{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text)}
+.hist-right{display:flex;align-items:center;gap:10px}
+.hist-cnt{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 9px;border-radius:100px;border:1px solid var(--border)}
+.hist-chev{color:var(--muted);font-size:12px;transition:transform .25s}
+.hist-card.open .hist-chev{transform:rotate(180deg)}
+.hist-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.hist-card.open .hist-body{max-height:1200px}
+.hist-inner{padding:0 1.25rem 1rem;display:flex;flex-direction:column;gap:5px}
+.hist-sub{font-size:10px;font-family:var(--mono);letter-spacing:.08em;color:var(--muted);margin:8px 0 4px;text-transform:uppercase}
+.hist-task-row{background:var(--surface2);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--muted)}
+.hist-task-name{font-weight:500;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.hist-task-name .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--accent-dim);padding:1px 7px;border-radius:5px;border:1px solid rgba(59,126,248,.15)}
+.hist-review-txt{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;white-space:pre-wrap}
+.hist-total-review{background:var(--teal-dim);border-left:3px solid rgba(13,148,136,.4);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.hist-today-resolve{background:var(--orange-dim);border-left:3px solid rgba(234,88,12,.3);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.empty-hist{text-align:center;color:var(--muted);font-size:13px;font-family:var(--mono);padding:2rem;border:1px dashed var(--border);border-radius:12px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.main>*{animation:fadeUp .4s ease both}
+.main>*:nth-child(1){animation-delay:0s}.main>*:nth-child(2){animation-delay:.05s}
+.main>*:nth-child(3){animation-delay:.1s}.main>*:nth-child(4){animation-delay:.15s}
+.main>*:nth-child(5){animation-delay:.2s}.main>*:nth-child(6){animation-delay:.25s}
+.main>*:nth-child(7){animation-delay:.3s}.main>*:nth-child(8){animation-delay:.35s}
+.main>*:nth-child(9){animation-delay:.4s}
+</style>
+</head>
+<body>
+<main class="main">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div>
+      <div class="logo">57이 · Work Log</div>
+      <div class="page-title">업무일지</div>
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="clock-date" id="clock-date">로딩 중...</div>
+      <div class="status-pill open" id="status-pill">
+        <span class="status-dot"></span>
+        <span id="status-text">편집 가능</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ① 고정 다짐 (항상 유지) -->
+  <div class="sec-label">나의 다짐 <span style="font-size:10px;color:var(--purple);font-family:var(--mono);letter-spacing:.06em">고정</span></div>
+  <div class="card-sm">
+    <div class="fixed-resolve-label">MY RESOLVE — 항상 마음에 새기는 다짐</div>
+    <textarea class="fixed-resolve-ta" id="fixed-resolve" placeholder="변하지 않는 나만의 다짐을 적어보세요..."></textarea>
+    <div class="fixed-hint">* 날짜가 바뀌어도 유지됩니다</div>
+  </div>
+
+  <!-- ② 오늘의 다짐 -->
+  <div class="sec-label">오늘의 다짐</div>
+  <div class="card-sm">
+    <div class="resolve-today-label">TODAY'S RESOLVE</div>
+    <textarea class="resolve-ta" id="today-resolve" placeholder="오늘 하루를 위한 다짐을 적어보세요..."></textarea>
+  </div>
+
+  <!-- ③ 오늘 업무 -->
+  <div class="sec-label">오늘 업무</div>
+  <div class="card" id="today-card">
+    <div class="today-date" id="today-date"># --/--</div>
+    <div class="task-list" id="task-list"></div>
+    <button class="add-btn" id="add-btn" onclick="addTask()">+ 업무 추가</button>
+    <div class="locked-notice" id="locked-notice">🔒 오후 11시 이후 수정이 잠겼습니다</div>
+  </div>
+
+  <!-- ④ 총합 업무 후기 -->
+  <div class="sec-label">총합 업무 후기</div>
+  <div class="card-sm">
+    <div class="total-review-label">TODAY'S TOTAL REVIEW</div>
+    <textarea class="total-review-ta" id="total-review" placeholder="오늘 업무 전체에 대한 후기를 적어보세요..."></textarea>
+  </div>
+
+  <!-- ⑤ 이전 기록 -->
+  <div class="sec-label">이전 기록</div>
+  <div class="history-list" id="history-list"></div>
+
+</main>
+
+<script>
+const STORE_KEY = 'worklog_57_v4';
+const FIXED_KEY = 'worklog_57_fixed';
+const DEFAULT_TASKS = ['경고차감','대위진급','진급리스트 작성','커뮤니티 관리','신고처리'];
+
+function getKST(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}))}
+function dateStr(d){return String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')}
+function dayOfWeek(d){return['일','월','화','수','목','금','토'][d.getDay()]}
+function isLocked(){return getKST().getHours()>=23}
+function load(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}catch{return{}}}
+function save(d){localStorage.setItem(STORE_KEY,JSON.stringify(d))}
+
+let data=load();
+let todayKey='';
+
+// data[key] = {
+//   defaults: [{text,count,review},...],
+//   extras:   [{text,count,review},...],
+//   todayResolve: string,
+//   totalReview: string
+// }
+
+function getDayData(key){
+  if(!data[key]||Array.isArray(data[key])){
+    data[key]={
+      defaults:DEFAULT_TASKS.map(t=>({text:t,count:'',review:''})),
+      extras:[],todayResolve:'',totalReview:''
+    };
+    save(data);
+  }
+  // migrate older formats
+  const d=data[key];
+  if(d.defaults&&typeof d.defaults[0]==='string'){
+    d.defaults=d.defaults.map(t=>({text:t,count:'',review:''}));
+    d.extras=(d.extras||[]).map(t=>({text:t,count:'',review:''}));
+    if(!d.todayResolve)d.todayResolve=d.resolve||'';
+    if(!d.totalReview)d.totalReview='';
+    delete d.resolve;
+    save(data);
+  }
+  if(d.defaults&&d.defaults[0]&&typeof d.defaults[0].review==='undefined'){
+    d.defaults=d.defaults.map(x=>({...x,review:''}));
+    d.extras=(d.extras||[]).map(x=>({...x,review:''}));
+    save(data);
+  }
+  if(!d.todayResolve&&d.resolve){d.todayResolve=d.resolve;delete d.resolve;save(data);}
+  if(!d.totalReview)d.totalReview='';
+  return d;
+}
+
+function makeTaskBlock(bulletCls,item,locked,onText,onCount,onReview,onDel){
+  const block=document.createElement('div');
+  block.className='task-block';
+
+  const row=document.createElement('div');
+  row.className='task-row';
+
+  const bullet=document.createElement('div');
+  bullet.className='task-bullet '+bulletCls;
+
+  const inp=document.createElement('input');
+  inp.className='task-input';
+  inp.type='text';
+  inp.value=item.text;
+  inp.placeholder='업무 내용...';
+  inp.disabled=locked;
+  inp.addEventListener('input',onText);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!locked)addTask()});
+
+  const cnt=document.createElement('input');
+  cnt.className='task-count';
+  cnt.type='text';
+  cnt.inputMode='numeric';
+  cnt.value=item.count;
+  cnt.placeholder='0';
+  cnt.disabled=locked;
+  cnt.title='처리 건수';
+  cnt.addEventListener('input',onCount);
+
+  const unit=document.createElement('span');
+  unit.className='count-unit';
+  unit.textContent='건';
+
+  row.appendChild(bullet);
+  row.appendChild(inp);
+  row.appendChild(cnt);
+  row.appendChild(unit);
+
+  if(onDel){
+    const del=document.createElement('button');
+    del.className='task-del';
+    del.title='삭제';
+    del.disabled=locked;
+    del.textContent='×';
+    del.onclick=onDel;
+    row.appendChild(del);
+  }
+
+  const revRow=document.createElement('div');
+  revRow.style.display='flex';
+  revRow.style.paddingLeft='14px';
+
+  const rev=document.createElement('textarea');
+  rev.className='task-review';
+  rev.placeholder='이 업무 후기...';
+  rev.value=item.review||'';
+  rev.disabled=locked;
+  rev.rows=1;
+  rev.addEventListener('input',()=>{
+    onReview(rev.value);
+    rev.style.height='auto';
+    rev.style.height=rev.scrollHeight+'px';
+  });
+  // auto-height init
+  setTimeout(()=>{rev.style.height='auto';rev.style.height=rev.scrollHeight+'px'},0);
+
+  revRow.appendChild(rev);
+  block.appendChild(row);
+  block.appendChild(revRow);
+  return block;
+}
+
+function renderTasks(){
+  const locked=isLocked();
+  const list=document.getElementById('task-list');
+  const day=getDayData(todayKey);
+  list.innerHTML='';
+
+  const defLbl=document.createElement('div');
+  defLbl.className='sub-label';
+  defLbl.textContent='기본 업무';
+  list.appendChild(defLbl);
+
+  day.defaults.forEach((item,i)=>{
+    const block=makeTaskBlock('def',item,locked,
+      e=>{day.defaults[i].text=e.target.value;save(data)},
+      e=>{day.defaults[i].count=e.target.value;save(data)},
+      v=>{day.defaults[i].review=v;save(data)},
+      null
+    );
+    list.appendChild(block);
+  });
+
+  const div=document.createElement('div');
+  div.className='divider';
+  list.appendChild(div);
+
+  if(day.extras.length>0){
+    const exLbl=document.createElement('div');
+    exLbl.className='sub-label';
+    exLbl.textContent='추가 업무';
+    list.appendChild(exLbl);
+  }
+
+  day.extras.forEach((item,i)=>{
+    const block=makeTaskBlock('',item,locked,
+      e=>{day.extras[i].text=e.target.value;save(data)},
+      e=>{day.extras[i].count=e.target.value;save(data)},
+      v=>{day.extras[i].review=v;save(data)},
+      ()=>{day.extras.splice(i,1);save(data);renderTasks()}
+    );
+    list.appendChild(block);
+  });
+}
+
+function addTask(){
+  if(isLocked())return;
+  const day=getDayData(todayKey);
+  day.extras.push({text:'',count:'',review:''});
+  save(data);
+  renderTasks();
+  setTimeout(()=>{
+    const inputs=document.querySelectorAll('.task-input');
+    if(inputs.length)inputs[inputs.length-1].focus();
+  },50);
+}
+
+function renderHistory(){
+  const container=document.getElementById('history-list');
+  const keys=Object.keys(data).filter(k=>k!==todayKey).sort().reverse();
+  if(!keys.length){container.innerHTML='<div class="empty-hist">// 이전 기록 없음</div>';return}
+  container.innerHTML='';
+  keys.forEach(key=>{
+    const day=data[key];
+    if(!day||typeof day!=='object')return;
+    const defaults=day.defaults||[];
+    const extras=day.extras||[];
+    const totalItems=defaults.length+extras.length;
+    const displayKey=key.replace('/','. ');
+
+    const card=document.createElement('div');
+    card.className='hist-card';
+
+    const hdr=document.createElement('div');
+    hdr.className='hist-header';
+    hdr.innerHTML=`<span class="hist-date-lbl">${displayKey}</span><span class="hist-right"><span class="hist-cnt">${totalItems}건</span><span class="hist-chev">▼</span></span>`;
+
+    const body=document.createElement('div');
+    body.className='hist-body';
+    const inner=document.createElement('div');
+    inner.className='hist-inner';
+
+    function addHistSection(label,items){
+      if(!items.length)return;
+      const sl=document.createElement('div');
+      sl.className='hist-sub';
+      sl.textContent=label;
+      inner.appendChild(sl);
+      items.forEach(item=>{
+        const t=typeof item==='string'?item:(item.text||'');
+        const c=typeof item==='string'?'':(item.count||'');
+        const r=typeof item==='string'?'':(item.review||'');
+        const wrap=document.createElement('div');
+        wrap.className='hist-task-row';
+        const name=document.createElement('div');
+        name.className='hist-task-name';
+        name.textContent=t||'(내용 없음)';
+        if(c){const chip=document.createElement('span');chip.className='chip';chip.textContent=c+'건';name.appendChild(chip)}
+        wrap.appendChild(name);
+        if(r){const rv=document.createElement('div');rv.className='hist-review-txt';rv.textContent=r;wrap.appendChild(rv)}
+        inner.appendChild(wrap);
+      });
+    }
+
+    addHistSection('기본 업무',defaults);
+    addHistSection('추가 업무',extras);
+
+    if(day.totalReview){
+      const sl=document.createElement('div');sl.className='hist-sub';sl.textContent='총합 후기';inner.appendChild(sl);
+      const rv=document.createElement('div');rv.className='hist-total-review';rv.textContent=day.totalReview;inner.appendChild(rv);
+    }
+    if(day.todayResolve){
+      const sl=document.createElement('div');sl.className='hist-sub';sl.textContent='오늘의 다짐';inner.appendChild(sl);
+      const rv=document.createElement('div');rv.className='hist-today-resolve';rv.textContent=day.todayResolve;inner.appendChild(rv);
+    }
+
+    body.appendChild(inner);
+    hdr.onclick=()=>card.classList.toggle('open');
+    card.appendChild(hdr);
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function updateLockUI(){
+  const locked=isLocked();
+  document.getElementById('status-pill').className='status-pill '+(locked?'locked':'open');
+  document.getElementById('status-text').textContent=locked?'수정 잠김':'편집 가능';
+  document.getElementById('locked-notice').classList.toggle('visible',locked);
+  document.getElementById('add-btn').disabled=locked;
+  document.getElementById('today-card').classList.toggle('locked-card',locked);
+  document.getElementById('today-resolve').disabled=locked;
+  document.getElementById('total-review').disabled=locked;
+}
+
+let lastLocked=null;
+function updateClock(){
+  const kst=getKST();
+  const h=String(kst.getHours()).padStart(2,'0');
+  const m=String(kst.getMinutes()).padStart(2,'0');
+  const s=String(kst.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent=`${h}:${m}:${s}`;
+  const yr=kst.getFullYear();
+  const mo=String(kst.getMonth()+1).padStart(2,'0');
+  const dy=String(kst.getDate()).padStart(2,'0');
+  document.getElementById('clock-date').textContent=`${yr}.${mo}.${dy} (${dayOfWeek(kst)})`;
+  const locked=isLocked();
+  if(locked!==lastLocked){lastLocked=locked;updateLockUI();renderTasks()}
+}
+
+function init(){
+  data=load();
+  const kst=getKST();
+  todayKey=dateStr(kst);
+  getDayData(todayKey);
+  document.getElementById('today-date').textContent='# '+todayKey;
+
+  // 고정 다짐 (별도 키로 저장)
+  const fixedTa=document.getElementById('fixed-resolve');
+  fixedTa.value=localStorage.getItem(FIXED_KEY)||'';
+  fixedTa.addEventListener('input',()=>localStorage.setItem(FIXED_KEY,fixedTa.value));
+
+  // 오늘의 다짐
+  const todayResolveTa=document.getElementById('today-resolve');
+  todayResolveTa.value=data[todayKey].todayResolve||'';
+  todayResolveTa.addEventListener('input',()=>{data[todayKey].todayResolve=todayResolveTa.value;save(data)});
+
+  // 총합 후기
+  const totalRevTa=document.getElementById('total-review');
+  totalRevTa.value=data[todayKey].totalReview||'';
+  totalRevTa.addEventListener('input',()=>{data[todayKey].totalReview=totalRevTa.value;save(data)});
+
+  lastLocked=isLocked();
+  updateLockUI();
+  updateClock();
+  renderTasks();
+  renderHistory();
+  setInterval(updateClock,1000);
+}
+
+init();
+</script>
+</body>
+</html>
